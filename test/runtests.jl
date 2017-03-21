@@ -1,5 +1,10 @@
 using NumericalIntegration
 using Base.Test
 
-# write your own tests here
-@test 1 == 2
+methods = [Trapezoidal(), TrapezoidalEven(), TrapezoidalFast(), TrapezoidalEvenFast(), SimpsonEven()]
+x = collect(-π : π/1000 : π)
+y = sin(x)
+for method in methods
+    println(string("Testing method: ", typeof(method)))
+    @test abs(integrate(x, y, method)) < 1e-4
+end
