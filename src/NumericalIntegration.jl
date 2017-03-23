@@ -6,6 +6,7 @@ immutable TrapezoidalEven     <: IntegrationMethod end
 immutable TrapezoidalFast     <: IntegrationMethod end
 immutable TrapezoidalEvenFast <: IntegrationMethod end
 immutable SimpsonEven         <: IntegrationMethod end # https://en.wikipedia.org/wiki/Simpson%27s_rule#Alternative_extended_Simpson.27s_rule
+immutable SimpsonEvenFast     <: IntegrationMethod end
 
 integrate{T<:AbstractFloat}(x::Vector{T}, y::Vector{T}, method::IntegrationMethod=Trapezoidal()) = integrate(x, y, method)
 
@@ -42,16 +43,25 @@ end
 
 function integrate{T<:AbstractFloat}(x::Vector{T}, y::Vector{T}, ::SimpsonEven)
     @assert length(x) == length(y) "x and y vectors must be of the same length!"
-    retval = 17*y[1] + 59*y[2] + 43*y[3] + 49*y[4] + 49*y[end-3] + 43*y[end-2] + 59*y[end-1] + 17*y[end]
-    retval /= 48
+    retval = (17*y[1] + 59*y[2] + 43*y[3] + 49*y[4] + 49*y[end-3] + 43*y[end-2] + 59*y[end-1] + 17*y[end]) / 48
     for i in 5 : length(y) - 1
         retval += y[i]
     end
     return (x[end] - x[1]) / (length(y) - 1) * retval
 end
 
+function integrate{T<:AbstractFloat}(x::Vector{T}, y::Vector{T}, ::SimpsonEvenFast)
+    @inbounds retval = 17*y[1] + 59*y[2] + 43*y[3] + 49*y[4]
+    @inbounds retval += 49*y[end-3] + 43*y[end-2] + 59*y[end-1] + 17*y[end]
+    retval /= 48
+    @fastmath @inbounds for i in 5 : length(y)-1
+        retval += y[i]
+    end
+    @inbounds return (x[end] - x[1]) / (length(y) - 1) * retval
+end
+
 export integrate
 export Trapezoidal, TrapezoidalEven, TrapezoidalFast, TrapezoidalEvenFast
-export SimpsonEven
+export SimpsonEven, SimpsonEvenFast
 
 end

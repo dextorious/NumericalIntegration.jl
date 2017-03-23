@@ -31,5 +31,6 @@ The currently available methods are:
 - TrapezoidalFast
 - TrapezoidalEvenFast
 - SimpsonEven
+- SimpsonEvenFast
 
-All methods containing "Even" in the name assume evenly spaced data. All methods containing "Fast" omit basic correctness checks and focus on performance. The fast methods will crash horribly if you supply invalid data.
+All methods containing "Even" in the name assume evenly spaced data. All methods containing "Fast" omit basic correctness checks and focus on performance. Consequently, the fast methods will segfault or produce incorrect results if you supply incorrect data (vectors of different lengths, etc.).

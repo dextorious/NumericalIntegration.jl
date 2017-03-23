@@ -1,7 +1,7 @@
 using NumericalIntegration
 using Base.Test
 
-methods = [Trapezoidal(), TrapezoidalEven(), TrapezoidalFast(), TrapezoidalEvenFast(), SimpsonEven()]
+methods = [Trapezoidal(), TrapezoidalEven(), TrapezoidalFast(), TrapezoidalEvenFast(), SimpsonEven(), SimpsonEvenFast()]
 x = collect(-π : π/1000 : π)
 y = sin(x)
 for method in methods
