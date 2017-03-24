@@ -1,10 +1,10 @@
 # NumericalIntegration
 
-[![Build Status](https://travis-ci.org/deXtoRious/NumericalIntegration.jl.svg?branch=master)](https://travis-ci.org/deXtoRious/NumericalIntegration.jl)
+[![Build Status](https://travis-ci.org/dextorious/NumericalIntegration.jl.svg?branch=master)](https://travis-ci.org/deXtoRious/NumericalIntegration.jl)
 
-[![Coverage Status](https://coveralls.io/repos/deXtoRious/NumericalIntegration.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/deXtoRious/NumericalIntegration.jl?branch=master)
+[![Coverage Status](https://coveralls.io/repos/dextorious/NumericalIntegration.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/dextorious/NumericalIntegration.jl?branch=master)
 
-[![codecov.io](http://codecov.io/github/deXtoRious/NumericalIntegration.jl/coverage.svg?branch=master)](http://codecov.io/github/deXtoRious/NumericalIntegration.jl?branch=master)
+[![codecov.io](http://codecov.io/github/dextorious/NumericalIntegration.jl/coverage.svg?branch=master)](http://codecov.io/github/dextorious/NumericalIntegration.jl?branch=master)
 
 This is a simple package to provide functionality for numerically integrating presampled data (meaning you can't choose arbitrary nodes). If you have the ability to evaluate your integrand at arbitrary points, please consider using better tools for the job (such as the excellent [FastGaussQuadrature.jl](https://github.com/ajt60gaibb/FastGaussQuadrature.jl)). 
 
