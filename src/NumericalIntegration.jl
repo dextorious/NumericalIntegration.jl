@@ -2,7 +2,14 @@ __precompile__()
 
 module NumericalIntegration
 
-abstract IntegrationMethod
+using Compat
+
+export integrate
+export Trapezoidal, TrapezoidalEven, TrapezoidalFast, TrapezoidalEvenFast
+export SimpsonEven, SimpsonEvenFast
+
+@compat abstract type IntegrationMethod end
+
 immutable Trapezoidal         <: IntegrationMethod end
 immutable TrapezoidalEven     <: IntegrationMethod end
 immutable TrapezoidalFast     <: IntegrationMethod end
@@ -61,9 +68,5 @@ function integrate{T<:AbstractFloat}(x::Vector{T}, y::Vector{T}, ::SimpsonEvenFa
     end
     @inbounds return (x[end] - x[1]) / (length(y) - 1) * retval
 end
-
-export integrate
-export Trapezoidal, TrapezoidalEven, TrapezoidalFast, TrapezoidalEvenFast
-export SimpsonEven, SimpsonEvenFast
 
 end
