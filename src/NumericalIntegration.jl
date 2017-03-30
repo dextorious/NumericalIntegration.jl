@@ -2,6 +2,8 @@ __precompile__()
 
 module NumericalIntegration
 
+using Compat
+
 export integrate
 export Trapezoidal, TrapezoidalEven, TrapezoidalFast, TrapezoidalEvenFast
 export SimpsonEven, SimpsonEvenFast
