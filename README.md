@@ -18,7 +18,7 @@ Do note that while the code is trivial, it has not been extensively tested and d
 x = collect(-π : π/1000 : π)
 y = sin(x)
 
-# integrate using the default Trapezoidal method
+# integrate using the default TrapezoidalFast method
 integrate(x, y)
 
 # integrate using a specific method
@@ -28,7 +28,7 @@ integrate(x, y, SimpsonEven())
 The currently available methods are:
 - Trapezoidal
 - TrapezoidalEven
-- TrapezoidalFast
+- TrapezoidalFast (default)
 - TrapezoidalEvenFast
 - SimpsonEven
 - SimpsonEvenFast
