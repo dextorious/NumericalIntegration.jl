@@ -28,7 +28,7 @@ end
 
 function integrate{X<:Number, Y<:Number}(x::AbstractVector{X}, y::AbstractVector{Y}, ::TrapezoidalEven)
     @assert length(x) == length(y) "x and y vectors must be of the same length!"
-    return 0.5 * (x[end] - x[1]) / (length(y) - 1) * (y[1] + y[end] + sum(y[2:end-1]))
+    return (x[2] - x[1]) * (0.5 * (y[1] + y[end]) + sum(y[2:end-1]))
 end
 
 function integrate{X<:Number, Y<:Number}(x::AbstractVector{X}, y::AbstractVector{Y}, ::TrapezoidalFast)
