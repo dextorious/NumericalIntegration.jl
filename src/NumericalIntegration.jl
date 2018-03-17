@@ -7,6 +7,7 @@ using Compat
 export integrate
 export Trapezoidal, TrapezoidalEven, TrapezoidalFast, TrapezoidalEvenFast
 export SimpsonEven, SimpsonEvenFast
+export IntegrationMethod
 
 @compat abstract type IntegrationMethod end
 
@@ -17,18 +18,20 @@ immutable TrapezoidalEvenFast <: IntegrationMethod end
 immutable SimpsonEven         <: IntegrationMethod end # https://en.wikipedia.org/wiki/Simpson%27s_rule#Alternative_extended_Simpson.27s_rule
 immutable SimpsonEvenFast     <: IntegrationMethod end
 
+const HALF = 1//2
+
 function integrate{X<:Number, Y<:Number}(x::AbstractVector{X}, y::AbstractVector{Y}, ::Trapezoidal)
   @assert length(x) == length(y) "x and y vectors must be of the same length!"
   retval = zero(promote(x[1], y[1])[1])
     for i in 1 : length(y)-1
       retval += (x[i+1] - x[i]) * (y[i] + y[i+1])
     end
-  return 0.5 * retval
+  return HALF * retval
 end
 
 function integrate{X<:Number, Y<:Number}(x::AbstractVector{X}, y::AbstractVector{Y}, ::TrapezoidalEven)
     @assert length(x) == length(y) "x and y vectors must be of the same length!"
-    return (x[2] - x[1]) * (0.5 * (y[1] + y[end]) + sum(y[2:end-1]))
+    return (x[2] - x[1]) * (HALF * (y[1] + y[end]) + sum(y[2:end-1]))
 end
 
 function integrate{X<:Number, Y<:Number}(x::AbstractVector{X}, y::AbstractVector{Y}, ::TrapezoidalFast)
@@ -36,7 +39,7 @@ function integrate{X<:Number, Y<:Number}(x::AbstractVector{X}, y::AbstractVector
     @fastmath @simd for i in 1 : length(y)-1
         @inbounds retval += (x[i+1] - x[i]) * (y[i] + y[i+1])
     end
-    return 0.5 * retval
+    return HALF * retval
 end
 
 function integrate{X<:Number, Y<:Number}(x::AbstractVector{X}, y::AbstractVector{Y}, ::TrapezoidalEvenFast)
@@ -45,7 +48,7 @@ function integrate{X<:Number, Y<:Number}(x::AbstractVector{X}, y::AbstractVector
     @fastmath @simd for i in 2 : N
         @inbounds retval += y[i]
     end
-    @inbounds return (x[2] - x[1]) * (retval + 0.5*y[1] + 0.5*y[end])
+    @inbounds return (x[2] - x[1]) * (retval + HALF*y[1] + HALF*y[end])
 end
 
 function integrate{X<:Number, Y<:Number}(x::AbstractVector{X}, y::AbstractVector{Y}, ::SimpsonEven)
