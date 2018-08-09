@@ -1,5 +1,6 @@
 using NumericalIntegration
-using Base.Test
+using Test
+using InteractiveUtils # for subtypes
 using StaticArrays
 
 @testset "compare with analytic result" begin
@@ -22,7 +23,7 @@ using StaticArrays
 end
 
 @testset "SVector" begin
-    xs  = linspace(0,1,10)
+    xs = range(0, stop=1, length=10)
     ys1 = randn(10)
     ys2 = randn(10)
     ys = map(SVector, ys1, ys2)
