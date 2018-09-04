@@ -3,6 +3,7 @@ module NumericalIntegration
 export integrate
 export Trapezoidal, TrapezoidalEven, TrapezoidalFast, TrapezoidalEvenFast
 export SimpsonEven, SimpsonEvenFast
+export RombergEven, RombergEvenFast
 export IntegrationMethod
 
 abstract type IntegrationMethod end
@@ -13,6 +14,10 @@ struct TrapezoidalFast     <: IntegrationMethod end
 struct TrapezoidalEvenFast <: IntegrationMethod end
 struct SimpsonEven         <: IntegrationMethod end # https://en.wikipedia.org/wiki/Simpson%27s_rule#Alternative_extended_Simpson.27s_rule
 struct SimpsonEvenFast     <: IntegrationMethod end
+struct RombergEven{T<:AbstractFloat}      <: IntegrationMethod
+    acc::T
+end # https://en.wikipedia.org/wiki/Romberg%27s_method
+RombergEven() = RombergEven(1e-12)
 
 const HALF = 1//2
 
@@ -69,6 +74,39 @@ function integrate(x::AbstractVector, y::AbstractVector, ::SimpsonEvenFast)
         retval += y[i]
     end
     @inbounds return (x[2] - x[1]) * retval
+end
+
+function integrate(x::AbstractVector, y::AbstractVector, m::RombergEven)
+    @assert length(x) == length(y) "x and y vectors must be of the same length!"
+    @assert ((length(x) - 1) & (length(x) - 2)) == 0 "Need length of vector to be 2^n + 1"
+    println(size(y[1]))
+    maxsteps::Integer = Int(log2(length(x)-1))
+    rombaux = zeros(typeof(x[1]), maxsteps, 2)
+    prevrow = 1
+    currrow = 2
+    @inbounds h = x[end] - x[1]
+    @inbounds rombaux[prevrow, 1] = (y[1] + y[end])*h*HALF
+    @inbounds for i in 1 : (maxsteps-1)
+        h *= HALF
+        npoints = 1 << (i-1)
+        jumpsize = div(length(x)-1, 2*npoints)
+        c = 0.0
+        for j in 1 : npoints
+            c += y[1 + (2*j-1)*jumpsize]
+        end
+        rombaux[1, currrow] = h*c + HALF*rombaux[1, prevrow]
+        for j in 2 : (i+1)
+            n_k = 4^(j-1)
+            rombaux[j, currrow] = (n_k*rombaux[j-1, currrow] - rombaux[j-1, prevrow])/(n_k - 1)
+        end
+
+        if i > maxsteps//3 && abs(rombaux[i, prevrow] - rombaux[i+1, currrow]) < m.acc
+            return rombaux[i+1, currrow]
+        end
+
+        prevrow, currrow = currrow, prevrow
+    end
+    @inbounds return rombaux[maxsteps, prevrow]
 end
 
 integrate(x::AbstractVector, y::AbstractVector) = integrate(x, y, TrapezoidalFast())
