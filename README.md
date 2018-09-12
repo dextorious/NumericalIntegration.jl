@@ -16,13 +16,21 @@ Do note that while the code is trivial, it has not been extensively tested and d
 ```julia
 # setup some data
 x = collect(-π : π/1000 : π)
-y = sin(x)
+y = sin.(x)
 
 # integrate using the default TrapezoidalFast method
 integrate(x, y)
 
 # integrate using a specific method
 integrate(x, y, SimpsonEven())
+
+# compute cumulative integral
+Y = cintegrate(x, y)
+
+# compute cumulative integral for each column of an array
+z = [sin.(x) cos.(x) exp.(x/pi)]
+Z = cintegrate(x, y)
+
 ```
 
 The currently available methods are:
@@ -32,5 +40,7 @@ The currently available methods are:
 - TrapezoidalEvenFast
 - SimpsonEven
 - SimpsonEvenFast
+
+Only Trapezoidal methods are available for cumumlative integrals.
 
 All methods containing "Even" in the name assume evenly spaced data. All methods containing "Fast" omit basic correctness checks and focus on performance. Consequently, the fast methods will segfault or produce incorrect results if you supply incorrect data (vectors of different lengths, etc.).
