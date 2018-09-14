@@ -1,6 +1,7 @@
 module NumericalIntegration
 
 using LinearAlgebra
+using Logging
 
 export integrate
 export Trapezoidal, TrapezoidalEven, TrapezoidalFast, TrapezoidalEvenFast
@@ -107,6 +108,8 @@ function integrate(x::AbstractVector, y::AbstractVector, m::RombergEven)
 
         prevrow, currrow = currrow, prevrow
     end
+    finalerr = norm(rombaux[maxsteps-1, prevrow] - rombaux[maxsteps, currrow], Inf)
+    @warn "RombergEven :: final step reached, but accuracy not: $finalerr > $(m.acc)"
     @inbounds return rombaux[maxsteps, prevrow]
 end
 

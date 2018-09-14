@@ -35,3 +35,11 @@ end
         @test res ≈ @SVector [res1, res2]
     end
 end
+
+@testset "Raising Warnings" begin
+    xs = collect(-1.0 : 0.5 : 1.0)
+    ys = xs.^2
+    m = RombergEven()
+    expwarn = "RombergEven :: final step reached, but accuracy not: 1.0 > 1.0e-12"
+    @test_logs (:warn, expwarn) integrate(xs, ys, m)
+end
