@@ -1,9 +1,11 @@
 module NumericalIntegration
 
+using LinearAlgebra
+
 export integrate
 export Trapezoidal, TrapezoidalEven, TrapezoidalFast, TrapezoidalEvenFast
 export SimpsonEven, SimpsonEvenFast
-export RombergEven, RombergEvenFast
+export RombergEven
 export IntegrationMethod
 
 abstract type IntegrationMethod end
@@ -79,9 +81,8 @@ end
 function integrate(x::AbstractVector, y::AbstractVector, m::RombergEven)
     @assert length(x) == length(y) "x and y vectors must be of the same length!"
     @assert ((length(x) - 1) & (length(x) - 2)) == 0 "Need length of vector to be 2^n + 1"
-    println(size(y[1]))
     maxsteps::Integer = Int(log2(length(x)-1))
-    rombaux = zeros(typeof(x[1]), maxsteps, 2)
+    rombaux = zeros(eltype(y), maxsteps, 2)
     prevrow = 1
     currrow = 2
     @inbounds h = x[end] - x[1]
@@ -100,7 +101,7 @@ function integrate(x::AbstractVector, y::AbstractVector, m::RombergEven)
             rombaux[j, currrow] = (n_k*rombaux[j-1, currrow] - rombaux[j-1, prevrow])/(n_k - 1)
         end
 
-        if i > maxsteps//3 && abs(rombaux[i, prevrow] - rombaux[i+1, currrow]) < m.acc
+        if i > maxsteps//3 && norm(rombaux[i, prevrow] - rombaux[i+1, currrow], Inf) < m.acc
             return rombaux[i+1, currrow]
         end
 
