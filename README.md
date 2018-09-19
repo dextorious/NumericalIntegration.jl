@@ -16,22 +16,36 @@ Do note that while the code is trivial, it has not been extensively tested and d
 ```julia
 # setup some data
 x = collect(-π : π/1000 : π)
-y = sin(x)
+y = sin.(x)
 
 # integrate using the default TrapezoidalFast method
 integrate(x, y)
 
 # integrate using a specific method
 integrate(x, y, SimpsonEven())
+
+# compute cumulative integral
+Y = cumul_integrate(x, y)
+
+# compute cumulative integral for each column of an array
+z = [sin.(x) cos.(x) exp.(x/pi)]
+Z = cumul_integrate(x, z)
+
+# compute cumulative integral for each line of an array
+zp = permutedims(z) 
+ZP = cumul_integrate(x, zp, dims=1)
+
 ```
 
 The currently available methods are:
-- Trapezoidal
+- Trapezoidal (default)
 - TrapezoidalEven
-- TrapezoidalFast (default)
+- TrapezoidalFast
 - TrapezoidalEvenFast
 - SimpsonEven
 - SimpsonEvenFast
 - RombergEven
+
+Only Trapezoidal methods are available for cumulative integrals.
 
 All methods containing "Even" in the name assume evenly spaced data. All methods containing "Fast" omit basic correctness checks and focus on performance. Consequently, the fast methods will segfault or produce incorrect results if you supply incorrect data (vectors of different lengths, etc.). RombergEven needs a power of 2 + 1 points (so 9, 17, 33, 65, 129, 257, 513, 1025...) evenly spaced for it to work. Useful when control over accuracy is needed. 
