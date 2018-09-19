@@ -25,18 +25,22 @@ integrate(x, y)
 integrate(x, y, SimpsonEven())
 
 # compute cumulative integral
-Y = cintegrate(x, y)
+Y = cumul_integrate(x, y)
 
 # compute cumulative integral for each column of an array
 z = [sin.(x) cos.(x) exp.(x/pi)]
-Z = cintegrate(x, y)
+Z = cumul_integrate(x, z)
+
+# compute cumulative integral for each line of an array
+zp = permutedims(z) 
+ZP = cumul_integrate(x, zp, dims=1)
 
 ```
 
 The currently available methods are:
-- Trapezoidal
+- Trapezoidal (default)
 - TrapezoidalEven
-- TrapezoidalFast (default)
+- TrapezoidalFast
 - TrapezoidalEvenFast
 - SimpsonEven
 - SimpsonEvenFast

@@ -1,6 +1,6 @@
 module NumericalIntegration
 
-export integrate, cintegrate
+export integrate, cumul_integrate
 export Trapezoidal, TrapezoidalEven, TrapezoidalFast, TrapezoidalEvenFast
 export SimpsonEven, SimpsonEvenFast
 export IntegrationMethod
@@ -28,22 +28,20 @@ function integrate(x,y...) end
 
 
 """
-    cintegrate(x,y...)
+    cumul_integrate(x,y...)
 
 Compute cumulative numerical integral of y(x) from x=x[1] to x=x[end]. Return a vector with elements of the same type as the input. If not method is supplied, use TrapezdoialFast.
 """
-function cintegrate(x,y...) end
+function cumul_integrate(x,y...) end
 
 #implementation
 
 function _zero(x,y)
     ret = zero(eltype(x)) + zero(eltype(y))
-    ret / 2
 end
 
 function _zeros(x::AbstractVector,y::AbstractVector)
     ret = zeros(eltype(x),size(x)) + zeros(eltype(y),size(y))
-    ret / 2
 end
 
 """
@@ -127,12 +125,12 @@ function integrate(x::AbstractVector, y::AbstractVector, ::SimpsonEvenFast)
 end
 
 """
-    integrate(x::AbstractVector, y::AbstractArray, method)
+    integrate(x::AbstractVector, y::AbstractMatrix, method; dims=2)
 
-When y is an array, compute integral for each column.
+When y is an array, compute integral along dimension specified by dims (default 2: columns).
 """
-function integrate(x::AbstractVector, y::AbstractArray, M::IntegrationMethod)
-    out = [integrate(x,y[:,j],M) for j=1:size(y,2)]
+function integrate(x::AbstractVector, y::AbstractMatrix, M::IntegrationMethod; dims=2)
+    out = [integrate(x,selectdim(y,dims,j),M) for j=1:size(y,dims)]
     return out
 end
 
@@ -140,11 +138,11 @@ end
 # cumulative integrals
 
 """
-    cintegrate(x::AbstractVector, y::AbstractVector, ::Trapezoidal)
+    cumul_integrate(x::AbstractVector, y::AbstractVector, ::Trapezoidal)
 
 Use Trapezoidal rule.
 """
-function cintegrate(x::AbstractVector, y::AbstractVector, ::Trapezoidal)
+function cumul_integrate(x::AbstractVector, y::AbstractVector, ::Trapezoidal)
     @assert length(x) == length(y) "x and y vectors must be of the same length!"
     retarr = _zeros(x,y)
     for i in 2 : length(y)
@@ -154,11 +152,11 @@ function cintegrate(x::AbstractVector, y::AbstractVector, ::Trapezoidal)
 end
 
 """
-    cintegrate(x::AbstractVector, y::AbstractVector, ::TrapezoidalEven)
+    cumul_integrate(x::AbstractVector, y::AbstractVector, ::TrapezoidalEven)
 
 Use Trapezoidal rule, assuming evenly spaced vector x.
 """
-function cintegrate(x::AbstractVector, y::AbstractVector, ::TrapezoidalEven)
+function cumul_integrate(x::AbstractVector, y::AbstractVector, ::TrapezoidalEven)
     @assert length(x) == length(y) "x and y vectors must be of the same length!"
     retarr = _zeros(x,y)
     for i in 2 : length(y)
@@ -168,11 +166,11 @@ function cintegrate(x::AbstractVector, y::AbstractVector, ::TrapezoidalEven)
 end
 
 """
-    cintegrate(x::AbstractVector, y::AbstractVector, ::TrapezoidalFast)
+    cumul_integrate(x::AbstractVector, y::AbstractVector, ::TrapezoidalFast)
 
 Use Trapezoidal rule. Unsafe method: no bound checking. This is the default when no method is supplied.
 """
-function cintegrate(x::AbstractVector, y::AbstractVector, ::TrapezoidalFast)
+function cumul_integrate(x::AbstractVector, y::AbstractVector, ::TrapezoidalFast)
     retarr = _zeros(x,y)
     @fastmath for i in 2 : length(y) #not sure if @simd can do anything here
         @inbounds retarr[i] = retarr[i-1] + (x[i] - x[i-1]) * (y[i] + y[i-1])
@@ -181,11 +179,11 @@ function cintegrate(x::AbstractVector, y::AbstractVector, ::TrapezoidalFast)
 end
 
 """
-    cintegrate(x::AbstractVector, y::AbstractVector, ::TrapezoidalEvenFast)
+    cumul_integrate(x::AbstractVector, y::AbstractVector, ::TrapezoidalEvenFast)
 
 Use Trapezoidal rule, assuming evenly spaced vector x. Unsafe method: no bound checking.
 """
-function cintegrate(x::AbstractVector, y::AbstractVector, ::TrapezoidalEvenFast)
+function cumul_integrate(x::AbstractVector, y::AbstractVector, ::TrapezoidalEvenFast)
     retarr = _zeros(x,y)
     @fastmath for i in 2 : length(y)
         @inbounds retarr[i] = retarr[i-1] + (y[i] + y[i-1])
@@ -194,22 +192,22 @@ function cintegrate(x::AbstractVector, y::AbstractVector, ::TrapezoidalEvenFast)
 end
 
 """
-    cintegrate(x::AbstractVector, y::AbstractArray, method)
+    cumul_integrate(x::AbstractVector, y::AbstractMatrix, method; dims=2)
 
-When y is an array, compute integral for each column.
+When y is an array, compute integral along each dimension specified by dims (default 2: columns)
 """
-function cintegrate(x::AbstractVector, y::AbstractArray, M::IntegrationMethod)
-    return hcat([cintegrate(x,y[:,j],M) for j=1:size(y,2)]...)
+function cumul_integrate(x::AbstractVector, y::AbstractMatrix, M::IntegrationMethod; dims=2)
+    return hcat([cumul_integrate(x,selectdim(y,dims,j),M) for j=1:size(y,dims)]...)
 end
 
 
 #default behaviour
-integrate(x::AbstractVector, y::AbstractVector) = integrate(x, y, TrapezoidalFast())
+integrate(x::AbstractVector, y::AbstractVector) = integrate(x, y, Trapezoidal())
 
-integrate(x::AbstractVector, y::AbstractArray) = integrate(x,y,TrapezoidalFast())
+integrate(x::AbstractVector, y::AbstractMatrix; dims=2) = integrate(x, y, Trapezoidal(); dims=dims)
 
-cintegrate(x::AbstractVector, y::AbstractVector) = cintegrate(x, y, TrapezoidalFast())
+cumul_integrate(x::AbstractVector, y::AbstractVector) = cumul_integrate(x, y, Trapezoidal())
 
-cintegrate(x::AbstractVector, y::AbstractArray) = cintegrate(x,y,TrapezoidalFast())
+cumul_integrate(x::AbstractVector, y::AbstractMatrix; dims=2) = cumul_integrate(x, y, Trapezoidal(); dims=dims)
 
 end
