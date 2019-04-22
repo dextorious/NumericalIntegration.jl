@@ -2,6 +2,7 @@ using NumericalIntegration
 using Test
 using InteractiveUtils # for subtypes
 using StaticArrays
+using HCubature # for testing n-dimensional integration
 
 @testset "compare with analytic result" begin
     x = collect(-π : 2*π/2048 : π)
@@ -20,6 +21,25 @@ using StaticArrays
             end
         end
     end
+end
+
+@testset "n-dimensional integration testing" begin
+    X = range(0,2π,length=10)
+    Y = range(-π,π,length=10)
+    Z = range(0,2,length=10)
+
+    A = Array{Float64}(undef,length(X),length(Y),length(Z))
+    f(x) = sin(x[1]) + cos(x[2]) + 2x[3]
+
+    for (k,z) in enumerate(Z)
+        for (j,y) in enumerate(Y)
+            for (i,x) in enumerate(X)
+                A[i,j,k] = f([x,y,z])
+            end
+        end
+    end
+
+    @test isapprox(integrate((X,Y,Z),A), hcubature(f,[0,-π,0],[2π,π,2])[1], atol=1e-4)
 end
 
 @testset "SVector" begin
