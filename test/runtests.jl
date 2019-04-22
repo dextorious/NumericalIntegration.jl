@@ -24,9 +24,9 @@ using HCubature # for testing n-dimensional integration
 end
 
 @testset "n-dimensional integration testing" begin
-    X = range(0,2π,length=10)
-    Y = range(-π,π,length=10)
-    Z = range(0,2,length=10)
+    X = range(0,stop=2π,length=10)
+    Y = range(-π,stop=π,length=10)
+    Z = range(0,stop=2,length=10)
 
     A = Array{Float64}(undef,length(X),length(Y),length(Z))
     f(x) = sin(x[1]) + cos(x[2]) + 2x[3]
