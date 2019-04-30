@@ -106,7 +106,7 @@ end
 """
     integrate(x::AbstractVector, y::AbstractVector, ::SimpsonEven)
 
-Use Simpson's rule, assuming evenly spaced vector x. 
+Use Simpson's rule, assuming evenly spaced vector x.
 """
 function integrate(x::AbstractVector, y::AbstractVector, ::SimpsonEven)
     @assert length(x) == length(y) "x and y vectors must be of the same length!"
@@ -177,17 +177,25 @@ function integrate(x::AbstractVector, y::AbstractVector, m::RombergEven)
 end
 
 """
-    integrate(Y::AbstractArray{T,N}, Varargs{AbstractVector,N}, method)
+    integrate(X::NTuple{N,AbstractVector}, Y::AbstractArray{T,N}, method, cache=nothing)
 
 Given an n-dimensional grid of values, compute the total integral along each dim
 """
-function integrate(X::NTuple{N,AbstractVector}, Y::AbstractArray{T,N}, M::IntegrationMethod) :: T where {T,N}
+function integrate(X::NTuple{N,AbstractVector}, Y::AbstractArray{T,N}, M::IntegrationMethod,
+                   cache::Union{AbstractVector{T}, Nothing}=nothing) :: T where {T,N}
     dims = size(Y)
-    d,n = length(dims), dims[end]
-    if d == 1
+    n = dims[end]
+    if N == 1
         return integrate(X[1], Y, M)
     else
-        return integrate(X[end], [integrate(X[1:d-1], selectdim(Y,d,i), M) for i in 1:n], M)
+        if cache == nothing
+            cache = Vector{T}(undef, n)
+        end
+        x = X[1:N-1]
+        @inbounds for i in 1:n
+            cache[i] = integrate(x, selectdim(Y,N,i), M)
+        end
+        return integrate(X[end], cache, M)
     end
 end
 
