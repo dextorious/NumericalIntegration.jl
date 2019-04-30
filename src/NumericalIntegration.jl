@@ -176,6 +176,22 @@ function integrate(x::AbstractVector, y::AbstractVector, m::RombergEven)
     @inbounds return rombaux[maxsteps, prevrow]
 end
 
+"""
+    integrate(Y::AbstractArray{T,N}, Varargs{AbstractVector,N}, method)
+
+Given an n-dimensional grid of values, compute the total integral along each dim
+"""
+function integrate(X::NTuple{N,AbstractVector}, Y::AbstractArray{T,N}, M::IntegrationMethod) :: T where {T,N}
+    dims = size(Y)
+    d,n = length(dims), dims[end]
+    if d == 1
+        return integrate(X[1], Y, M)
+    else
+        return integrate(X[end], [integrate(X[1:d-1], selectdim(Y,d,i), M) for i in 1:n], M)
+    end
+end
+
+
 
 # cumulative integrals
 
@@ -242,11 +258,12 @@ function cumul_integrate(x::AbstractVector, y::AbstractMatrix, M::IntegrationMet
     return hcat([cumul_integrate(x,selectdim(y,dims,j),M) for j=1:size(y,dims)]...)
 end
 
-
 #default behaviour
 integrate(x::AbstractVector, y::AbstractVector) = integrate(x, y, Trapezoidal())
 
 integrate(x::AbstractVector, y::AbstractMatrix; dims=2) = integrate(x, y, Trapezoidal(); dims=dims)
+
+integrate(X::NTuple, Y::AbstractArray) = integrate(X, Y, Trapezoidal())
 
 cumul_integrate(x::AbstractVector, y::AbstractVector) = cumul_integrate(x, y, Trapezoidal())
 
