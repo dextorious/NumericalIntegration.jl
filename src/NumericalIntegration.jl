@@ -176,24 +176,24 @@ function integrate(x::AbstractVector, y::AbstractVector, m::RombergEven)
     @inbounds return rombaux[maxsteps, prevrow]
 end
 
+
+
+function integrate(X::Tuple{AbstractVector}, Y::AbstractVector{T}, M::IntegrationMethod) :: T where {T}
+    return integrate(X[1], Y, M)
+end
 """
     integrate(X::NTuple{N,AbstractVector}, Y::AbstractArray{T,N}, method, cache=nothing)
 
 Given an n-dimensional grid of values, compute the total integral along each dim
 """
 function integrate(X::NTuple{N,AbstractVector}, Y::AbstractArray{T,N}, M::IntegrationMethod) :: T where {T,N}
-    dims = size(Y)
-    n = dims[end]
-    if N == 1
-        return integrate(X[1], Y, M)
-    else
-        cache = Vector{T}(undef, n)
-        x = X[1:N-1]
-        @inbounds for i in 1:n
-            cache[i] = integrate(x, selectdim(Y,N,i), M)
-        end
-        return integrate(X[end], cache, M)
+    n = last(size(Y))
+    cache = Vector{T}(undef, n)
+    x = X[1:N-1]
+    @inbounds for i in 1:n
+        cache[i] = integrate(x, selectdim(Y,N,i), M)
     end
+    return integrate(X[end], cache, M)
 end
 
 
