@@ -181,16 +181,13 @@ end
 
 Given an n-dimensional grid of values, compute the total integral along each dim
 """
-function integrate(X::NTuple{N,AbstractVector}, Y::AbstractArray{T,N}, M::IntegrationMethod,
-                   cache::Union{AbstractVector{T}, Nothing}=nothing) :: T where {T,N}
+function integrate(X::NTuple{N,AbstractVector}, Y::AbstractArray{T,N}, M::IntegrationMethod) :: T where {T,N}
     dims = size(Y)
     n = dims[end]
     if N == 1
         return integrate(X[1], Y, M)
     else
-        if cache == nothing
-            cache = Vector{T}(undef, n)
-        end
+        cache = Vector{T}(undef, n)
         x = X[1:N-1]
         @inbounds for i in 1:n
             cache[i] = integrate(x, selectdim(Y,N,i), M)
