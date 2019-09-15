@@ -2,6 +2,8 @@ module NumericalIntegration
 
 using LinearAlgebra
 using Logging
+using Base.Iterators
+using Interpolations
 
 export integrate, cumul_integrate
 export Trapezoidal, TrapezoidalEven, TrapezoidalFast, TrapezoidalEvenFast
@@ -177,24 +179,72 @@ function integrate(x::AbstractVector, y::AbstractVector, m::RombergEven)
 end
 
 
-
-function integrate(X::Tuple{AbstractVector}, Y::AbstractVector{T}, M::IntegrationMethod) :: T where {T}
-    return integrate(X[1], Y, M)
-end
-"""
-    integrate(X::NTuple{N,AbstractVector}, Y::AbstractArray{T,N}, method, cache=nothing)
-
-Given an n-dimensional grid of values, compute the total integral along each dim
-"""
-function integrate(X::NTuple{N,AbstractVector}, Y::AbstractArray{T,N}, M::IntegrationMethod) :: T where {T,N}
-    n = last(size(Y))
-    cache = Vector{T}(undef, n)
-    x = X[1:N-1]
-    @inbounds for i in 1:n
-        cache[i] = integrate(x, selectdim(Y,N,i), M)
+@inline function _midpoints(x::AbstractVector{T}) where T
+    length(x) == 1 && return x
+    retval = Vector{T}(undef, length(x)-1)
+    @simd for i in eachindex(retval)
+        retval[i] = HALF * (x[i] + x[i+1])
     end
-    return integrate(X[end], cache, M)
+    return retval
 end
+@inline function _midpoints(x::AbstractRange)
+    length(x) == 1 && return x
+    Δx = HALF*step(x)
+    return range(first(x)+Δx, stop=last(x)-Δx, length=length(x)-1)
+end
+
+function integrate(X::NTuple{N,AbstractVector}, Y::AbstractArray{T,N}, ::Trapezoidal) where {T,N}
+    @assert length.(X) == size(Y)
+    return integrate(X, Y, TrapezoidalFast())
+end
+
+function integrate(X::NTuple{N,AbstractVector}, Y::AbstractArray{T,N}, ::TrapezoidalFast) where {T,N}
+    midpnts = map(_midpoints, X)
+    Δ(x::AbstractVector) = length(x) > 1 ? diff(x) : 1
+    Δxs = map(Δ, X)
+    interp = LinearInterpolation(X,Y)
+    f((Δx,x)) = prod(Δx)*interp(x...)
+    return sum(f, zip(product(Δxs...), product(midpnts...)))
+end
+
+function integrate(X::NTuple{N,AbstractVector}, Y::AbstractArray{T,N}, ::TrapezoidalEvenFast) where {T,N}
+    midpnts = map(_midpoints, X)
+    Δ(x::AbstractVector) = length(x) > 1 ? x[2] - x[1] : 1
+    Δx = prod(Δ, X)
+    interp = LinearInterpolation(X,Y)
+    f(x) = interp(x...)
+    return Δx*sum(f, product(midpnts...))
+end
+
+function integrate(X::NTuple{N,AbstractRange}, Y::AbstractArray{T,N}, ::TrapezoidalEvenFast) where {T,N}
+    midpnts = map(_midpoints, X)
+    Δ(x::AbstractVector) = length(x) > 1 ? step(x) : 1
+    Δx = prod(Δ, X)
+    interp = LinearInterpolation(X,Y)
+    f(x) = interp(x...)
+    return Δx*sum(f, product(midpnts...))
+end
+
+
+
+
+#function integrate(X::Tuple{AbstractVector}, Y::AbstractVector{T}, M::IntegrationMethod) :: T where {T}
+#    return integrate(X[1], Y, M)
+#end
+#"""
+#    integrate(X::NTuple{N,AbstractVector}, Y::AbstractArray{T,N}, method, cache=nothing)
+#
+#Given an n-dimensional grid of values, compute the total integral along each dim
+#"""
+#function integrate(X::NTuple{N,AbstractVector}, Y::AbstractArray{T,N}, M::IntegrationMethod) :: T where {T,N}
+#    n = last(size(Y))
+#    cache = Vector{T}(undef, n)
+#    x = X[1:N-1]
+#    @inbounds for i in 1:n
+#        cache[i] = integrate(x, selectdim(Y,N,i), M)
+#    end
+#    return integrate(X[end], cache, M)
+#end
 
 
 
