@@ -32,7 +32,7 @@ const HALF = 1//2
 """
     integrate(x,y...)
 
-Compute numerical integral of y(x) from x=x[1] to x=x[end]. Return a scalar of the same type as the input. If not method is supplied, use TrapezdoialFast.
+Compute numerical integral of y(x) from x=x[1] to x=x[end]. Return a scalar of the same type as the input. If no method is supplied, use Trapezdoial.
 """
 function integrate(x,y...) end
 
@@ -40,7 +40,7 @@ function integrate(x,y...) end
 """
     cumul_integrate(x,y...)
 
-Compute cumulative numerical integral of y(x) from x=x[1] to x=x[end]. Return a vector with elements of the same type as the input. If not method is supplied, use TrapezdoialFast.
+Compute cumulative numerical integral of y(x) from x=x[1] to x=x[end]. Return a vector with elements of the same type as the input. If no method is supplied, use Trapezdoial.
 """
 function cumul_integrate(x,y...) end
 
@@ -57,7 +57,7 @@ end
 """
     integrate(x::AbstractVector, y::AbstractVector, ::Trapezoidal)
 
-Use Trapezoidal rule.
+Use Trapezoidal rule. This is the default when no method is supplied.
 """
 function integrate(x::AbstractVector, y::AbstractVector, ::Trapezoidal)
     @assert length(x) == length(y) "x and y vectors must be of the same length!"
@@ -81,7 +81,7 @@ end
 """
     integrate(x::AbstractVector, y::AbstractVector, ::TrapezoidalFast)
 
-Use Trapezoidal rule. Unsafe method: no bound checking. This is the default when no method is supplied.
+Use Trapezoidal rule. Unsafe method: no bound checking.
 """
 function integrate(x::AbstractVector, y::AbstractVector, ::TrapezoidalFast)
     retval = _zero(x,y)
@@ -253,7 +253,7 @@ end
 """
     cumul_integrate(x::AbstractVector, y::AbstractVector, ::Trapezoidal)
 
-Use Trapezoidal rule.
+Use Trapezoidal rule. This is the default when no method is supplied.
 """
 function cumul_integrate(x::AbstractVector, y::AbstractVector, ::Trapezoidal)
     @assert length(x) == length(y) "x and y vectors must be of the same length!"
@@ -281,7 +281,7 @@ end
 """
     cumul_integrate(x::AbstractVector, y::AbstractVector, ::TrapezoidalFast)
 
-Use Trapezoidal rule. Unsafe method: no bound checking. This is the default when no method is supplied.
+Use Trapezoidal rule. Unsafe method: no bound checking.
 """
 function cumul_integrate(x::AbstractVector, y::AbstractVector, ::TrapezoidalFast)
     retarr = _zeros(x,y)
