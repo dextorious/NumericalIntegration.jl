@@ -18,7 +18,7 @@ Do note that while the code is trivial, it has not been extensively tested and d
 x = collect(-π : π/1000 : π)
 y = sin.(x)
 
-# integrate using the default TrapezoidalFast method
+# integrate using the default Trapezoidal method
 integrate(x, y)
 
 # integrate using a specific method
@@ -32,7 +32,7 @@ z = [sin.(x) cos.(x) exp.(x/pi)]
 Z = cumul_integrate(x, z)
 
 # compute cumulative integral for each line of an array
-zp = permutedims(z) 
+zp = permutedims(z)
 ZP = cumul_integrate(x, zp, dims=1)
 
 ```
