@@ -35,6 +35,9 @@ Z = cumul_integrate(x, z)
 zp = permutedims(z)
 ZP = cumul_integrate(x, zp, dims=1)
 
+# Multidimensional integration
+Y = [i*j for i=x,j=y]
+integrate((x,y), Y)
 ```
 
 The currently available methods are:
@@ -46,6 +49,6 @@ The currently available methods are:
 - SimpsonEvenFast
 - RombergEven
 
-Only Trapezoidal methods are available for cumulative integrals.
+Currently cumulative integrals and multidimensional integrals are restricted to using Trapezoidal methods.
 
 All methods containing "Even" in the name assume evenly spaced data. All methods containing "Fast" omit basic correctness checks and focus on performance. Consequently, the fast methods will segfault or produce incorrect results if you supply incorrect data (vectors of different lengths, etc.). RombergEven needs a power of 2 + 1 points (so 9, 17, 33, 65, 129, 257, 513, 1025...) evenly spaced for it to work. Useful when control over accuracy is needed. 
