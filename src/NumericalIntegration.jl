@@ -173,7 +173,7 @@ function integrate(x::AbstractVector, y::AbstractVector, m::RombergEven)
 
         prevrow, currrow = currrow, prevrow
     end
-    finalerr = norm(rombaux[maxsteps-1, prevrow] - rombaux[maxsteps, currrow], Inf)
+    finalerr = norm(rombaux[maxsteps-1, currrow] - rombaux[maxsteps, prevrow], Inf)
     @warn "RombergEven :: final step reached, but accuracy not: $finalerr > $(m.acc)"
     @inbounds return rombaux[maxsteps, prevrow]
 end
