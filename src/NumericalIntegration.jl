@@ -147,7 +147,7 @@ end
 function integrate(x::AbstractVector, y::AbstractVector, m::RombergEven)
     @assert length(x) == length(y) "x and y vectors must be of the same length!"
     @assert ((length(x) - 1) & (length(x) - 2)) == 0 "Need length of vector to be 2^n + 1"
-    maxsteps::Integer = Int(log2(length(x)-1))
+    maxsteps = Int(log2(length(x)-1))
     rombaux = zeros(eltype(y), maxsteps, 2)
     prevcol = 1
     currcol = 2
