@@ -157,7 +157,7 @@ function integrate(x::AbstractVector, y::AbstractVector, m::RombergEven)
         h *= HALF
         npoints = 1 << (i-1)
         jumpsize = div(length(x)-1, 2*npoints)
-        c = zero(h)
+        c = zero(eltype(y))
         for j in 1 : npoints
             c += y[1 + (2*j-1)*jumpsize]
         end
