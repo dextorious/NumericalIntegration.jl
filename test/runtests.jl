@@ -60,6 +60,6 @@ end
     xs = collect(-1.0 : 0.5 : 1.0)
     ys = xs.^2
     m = RombergEven()
-    expwarn = "RombergEven :: final step reached, but accuracy not: 1.0 > 1.0e-12"
+    expwarn = "RombergEven :: final step reached, but accuracy not: 1.3333333333333335 > 1.0e-12"
     @test_logs (:warn, expwarn) integrate(xs, ys, m)
 end

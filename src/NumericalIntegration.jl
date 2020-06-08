@@ -147,35 +147,35 @@ end
 function integrate(x::AbstractVector, y::AbstractVector, m::RombergEven)
     @assert length(x) == length(y) "x and y vectors must be of the same length!"
     @assert ((length(x) - 1) & (length(x) - 2)) == 0 "Need length of vector to be 2^n + 1"
-    maxsteps::Integer = Int(log2(length(x)-1))
+    maxsteps = Int(log2(length(x)-1))
     rombaux = zeros(eltype(y), maxsteps, 2)
-    prevrow = 1
-    currrow = 2
+    prevcol = 1
+    currcol = 2
     @inbounds h = x[end] - x[1]
-    @inbounds rombaux[prevrow, 1] = (y[1] + y[end])*h*HALF
+    @inbounds rombaux[1, 1] = (y[1] + y[end])*h*HALF
     @inbounds for i in 1 : (maxsteps-1)
         h *= HALF
         npoints = 1 << (i-1)
         jumpsize = div(length(x)-1, 2*npoints)
-        c = 0.0
+        c = zero(eltype(y))
         for j in 1 : npoints
             c += y[1 + (2*j-1)*jumpsize]
         end
-        rombaux[1, currrow] = h*c + HALF*rombaux[1, prevrow]
+        rombaux[1, currcol] = h*c + HALF*rombaux[1, prevcol]
         for j in 2 : (i+1)
             n_k = 4^(j-1)
-            rombaux[j, currrow] = (n_k*rombaux[j-1, currrow] - rombaux[j-1, prevrow])/(n_k - 1)
+            rombaux[j, currcol] = (n_k*rombaux[j-1, currcol] - rombaux[j-1, prevcol])/(n_k - 1)
         end
 
-        if i > maxsteps//3 && norm(rombaux[i, prevrow] - rombaux[i+1, currrow], Inf) < m.acc
-            return rombaux[i+1, currrow]
+        if i > maxsteps//3 && norm(rombaux[i, prevcol] - rombaux[i+1, currcol], Inf) < m.acc
+            return rombaux[i+1, currcol]
         end
 
-        prevrow, currrow = currrow, prevrow
+        prevcol, currcol = currcol, prevcol
     end
-    finalerr = norm(rombaux[maxsteps-1, prevrow] - rombaux[maxsteps, currrow], Inf)
+    finalerr = norm(rombaux[maxsteps-1, currcol] - rombaux[maxsteps, prevcol], Inf)
     @warn "RombergEven :: final step reached, but accuracy not: $finalerr > $(m.acc)"
-    @inbounds return rombaux[maxsteps, prevrow]
+    @inbounds return rombaux[maxsteps, prevcol]
 end
 
 
