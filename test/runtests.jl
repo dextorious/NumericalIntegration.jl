@@ -77,3 +77,13 @@ end
     expwarn = "RombergEven :: final step reached, but accuracy not: 1.3333333333333335 > 1.0e-12"
     @test_logs (:warn, expwarn) integrate(xs, ys, m)
 end
+
+using Unitful
+
+@testset "Unitful compatibility" begin
+    x = LinRange(1u"s", 10u"s", 9)
+    y = rand(9)*u"m/s"
+    for M in subtypes(IntegrationMethod)
+        @test typeof(integrate(x,y,M())) == typeof(1.0u"m")
+    end
+end
