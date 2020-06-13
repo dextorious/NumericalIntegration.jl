@@ -26,10 +26,6 @@ RombergEven() = RombergEven(1e-12)
 
 const HALF = 1//2
 
-function _zero_type(x,y)
-    typeof(zero(eltype(x)) * zero(eltype(y)))
-end
-
 #documentation
 
 """
@@ -151,12 +147,12 @@ function integrate(x::AbstractVector, y::AbstractVector, m::RombergEven)
     @assert length(x) == length(y) "x and y vectors must be of the same length!"
     @assert ((length(x) - 1) & (length(x) - 2)) == 0 "Need length of vector to be 2^n + 1"
     maxsteps::Integer = Int(log2(length(x)-1))
-    T = _zero_type(x,y)
-    rombaux = zeros(T, maxsteps, 2)
+    @inbounds h = x[end] - x[1]
+    @inbounds v = (y[1] + y[end]) * h * HALF
+    rombaux = Matrix{typeof(v)}(undef, maxsteps, 2)
+    rombaux[1,1] = v
     prevcol = 1
     currcol = 2
-    @inbounds h = x[end] - x[1]
-    @inbounds rombaux[1, 1] = (y[1] + y[end])*h*HALF
     @inbounds for i in 1 : (maxsteps-1)
         h *= HALF
         npoints = 1 << (i-1)
