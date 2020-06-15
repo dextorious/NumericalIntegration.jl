@@ -23,6 +23,20 @@ using HCubature # for testing n-dimensional integration
     end
 end
 
+@testset "cumulative integration" begin
+    x = collect(-π : 2*π/2048 : π)
+    y = sin.(x)
+    exact = @. -cos(x) + cos(-π)
+    for M in subtypes(IntegrationMethod)
+        hasmethod(cumul_integrate, Tuple{AbstractVector, AbstractVector, M}) || continue
+        for T in [Float32, Float64, BigFloat]
+            result = @inferred cumul_integrate(T.(x), T.(y), M())
+            @test typeof(result) == Vector{T}
+            @test all(isapprox.(result, exact, atol=1e-4))
+        end
+    end
+end
+
 @testset "n-dimensional integration testing" begin
     X = range(0,stop=2π,length=10)
     Y = range(-π,stop=π,length=10)
