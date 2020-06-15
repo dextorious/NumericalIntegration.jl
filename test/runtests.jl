@@ -85,5 +85,8 @@ using Unitful
     y = rand(9)*u"m/s"
     for M in subtypes(IntegrationMethod)
         @test typeof(integrate(x,y,M())) == typeof(1.0u"m")
+        if hasmethod(cumul_integrate, Tuple{AbstractVector, AbstractVector, M})
+            @test typeof(cumul_integrate(x,y,M())) == Vector{typeof(1.0u"m")}
+        end
     end
 end
