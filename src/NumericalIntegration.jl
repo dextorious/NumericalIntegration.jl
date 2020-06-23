@@ -42,7 +42,7 @@ function integrate(x,y...) end
 
 Compute cumulative numerical integral of y(x) from x=x[1] to x=x[end]. Return a vector with elements of the same type as the input. If no method is supplied, use Trapezdoial.
 """
-function cumul_integrate(x,y...) end
+function cumul_integrate end
 
 #implementation
 
@@ -256,9 +256,8 @@ end
 Use Trapezoidal rule. This is the default when no method is supplied.
 """
 function cumul_integrate(x::AbstractVector, y::AbstractVector, ::Trapezoidal)
-    n = length(x)
-    @assert length(y) == n "x and y vectors must be of the same length!"
-    n ≥ 2 || error("vectors must contain at least two elements")
+    @assert length(x) == length(y) "x and y vectors must be of the same length!"
+    length(x) ≥ 2 || error("vectors must contain at least two elements")
 
     return cumul_integrate(x, y, TrapezoidalFast())
 end
@@ -273,7 +272,7 @@ Use Trapezoidal rule, assuming evenly spaced vector x.
 """
 function cumul_integrate(x::AbstractVector, y::AbstractVector, ::TrapezoidalEven)
     @assert length(x) == length(y) "x and y vectors must be of the same length!"
-    n ≥ 2 || error("vectors must contain at least two elements")
+    length(x) ≥ 2 || error("vectors must contain at least two elements")
 
     return cumul_integrate(x, y, TrapezoidalEvenFast())
 end
@@ -286,7 +285,8 @@ Use Trapezoidal rule. Unsafe method: no bound checking.
 function cumul_integrate(x::AbstractVector, y::AbstractVector, ::TrapezoidalFast)
     # compute initial value
     @inbounds init = (x[2] - x[1]) * (y[1] + y[2])
-    retarr[i] = Vector{typeof(init)}(undef, n)
+    n = length(x)
+    retarr = Vector{typeof(init)}(undef, n)
     retarr[1] = init
 
     # for all other values
@@ -303,7 +303,12 @@ end
 Use Trapezoidal rule, assuming evenly spaced vector x. Unsafe method: no bound checking.
 """
 function cumul_integrate(x::AbstractVector, y::AbstractVector, ::TrapezoidalEvenFast)
-    retarr = _zeros(x,y)
+    @inbounds init = y[1] + y[2]
+    n = length(x)
+    retarr = Vector{typeof(init)}(undef, n)
+    retarr[1] = init
+
+    # for all other values
     @fastmath for i in 2 : length(y)
         @inbounds retarr[i] = retarr[i-1] + (y[i] + y[i-1])
     end
