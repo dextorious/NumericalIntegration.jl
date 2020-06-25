@@ -153,6 +153,9 @@ function integrate(x::AbstractVector, y::AbstractVector, m::RombergEven)
     rombaux[1,1] = v
     prevcol = 1
     currcol = 2
+    # Precomputed values for norm check
+    acc_compare = m.acc * oneunit(norm(v,Inf))
+    minsteps = maxsteps ÷ 3
     @inbounds for i in 1 : (maxsteps-1)
         h *= HALF
         npoints = 1 << (i-1)
@@ -169,7 +172,7 @@ function integrate(x::AbstractVector, y::AbstractVector, m::RombergEven)
 
         # Clunky way to address Unitful compatibility, while also allowing for vectors
         normval = norm(rombaux[i, prevcol] - rombaux[i+1, currcol], Inf)
-        if i > maxsteps//3 && normval/oneunit(normval) < m.acc
+        if i > minsteps && normval < acc_compare
             return rombaux[i+1, currcol]
         end
 
