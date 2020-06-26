@@ -26,7 +26,6 @@ RombergEven() = RombergEven(1e-12)
 
 const HALF = 1//2
 
-
 #documentation
 
 """
@@ -147,12 +146,16 @@ end
 function integrate(x::AbstractVector, y::AbstractVector, m::RombergEven)
     @assert length(x) == length(y) "x and y vectors must be of the same length!"
     @assert ((length(x) - 1) & (length(x) - 2)) == 0 "Need length of vector to be 2^n + 1"
-    maxsteps = Int(log2(length(x)-1))
-    rombaux = zeros(eltype(y), maxsteps, 2)
+    maxsteps::Integer = Int(log2(length(x)-1))
+    @inbounds h = x[end] - x[1]
+    @inbounds v = (y[1] + y[end]) * h * HALF
+    rombaux = Matrix{typeof(v)}(undef, maxsteps, 2)
+    rombaux[1,1] = v
     prevcol = 1
     currcol = 2
-    @inbounds h = x[end] - x[1]
-    @inbounds rombaux[1, 1] = (y[1] + y[end])*h*HALF
+    # Precomputed values for norm check
+    acc_compare = m.acc * oneunit(norm(v,Inf))
+    minsteps = maxsteps ÷ 3
     @inbounds for i in 1 : (maxsteps-1)
         h *= HALF
         npoints = 1 << (i-1)
@@ -167,7 +170,9 @@ function integrate(x::AbstractVector, y::AbstractVector, m::RombergEven)
             rombaux[j, currcol] = (n_k*rombaux[j-1, currcol] - rombaux[j-1, prevcol])/(n_k - 1)
         end
 
-        if i > maxsteps//3 && norm(rombaux[i, prevcol] - rombaux[i+1, currcol], Inf) < m.acc
+        # Clunky way to address Unitful compatibility, while also allowing for vectors
+        normval = norm(rombaux[i, prevcol] - rombaux[i+1, currcol], Inf)
+        if i > minsteps && normval < acc_compare
             return rombaux[i+1, currcol]
         end
 
