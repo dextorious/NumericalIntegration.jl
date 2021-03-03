@@ -15,7 +15,7 @@ Do note that while the code is trivial, it has not been extensively tested and d
 
 ```julia
 # setup some data
-x = collect(-π : π/1000 : π)
+x = collect(-π/2 : π/1000 : π/2)
 y = sin.(x)
 
 # integrate using the default Trapezoidal method
