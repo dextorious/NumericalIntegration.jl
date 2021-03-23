@@ -54,6 +54,12 @@ end
     end
 
     @test isapprox(integrate((X,Y,Z),A), hcubature(f,[0,-π,0],[2π,π,2])[1], atol=1e-4)
+
+    X = range(-π/2,stop=π/2,length=10)
+    Y = sin.(X)
+    ω = [x * y for x in X, y in Y]
+    res = integrate((X, Y), ω)
+    @test typeof(res) == Float64
 end
 
 @testset "SVector" begin

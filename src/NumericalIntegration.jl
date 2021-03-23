@@ -33,7 +33,7 @@ const HALF = 1//2
 
 Compute numerical integral of y(x) from x=x[1] to x=x[end]. Return a scalar of the same type as the input. If no method is supplied, use Trapezdoial.
 """
-function integrate(x,y...) end
+function integrate end
 
 
 """
@@ -330,18 +330,7 @@ function cumul_integrate(x::AbstractVector, y::AbstractMatrix, M::IntegrationMet
 end
 
 #default behaviour
-integrate(x::AbstractVector, y::AbstractVector) = integrate(x, y, Trapezoidal())
-
-function integrate(x::AbstractVector, y::AbstractMatrix; kwargs...)
-    return integrate(x, y, Trapezoidal(); kwargs...)
-end
-
-integrate(X::NTuple, Y::AbstractArray) = integrate(X, Y, Trapezoidal())
-
-cumul_integrate(x::AbstractVector, y::AbstractVector) = cumul_integrate(x, y, Trapezoidal())
-
-function cumul_integrate(x::AbstractVector, y::AbstractMatrix; kwargs...)
-    return cumul_integrate(x, y, Trapezoidal(); kwargs...)
-end
+integrate(x, y; kwargs...) = integrate(x, y, Trapezoidal(); kwargs...)
+cumul_integrate(x, y; kwargs...) = cumul_integrate(x, y, Trapezoidal(); kwargs...)
 
 end # module
