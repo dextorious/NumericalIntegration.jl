@@ -7,7 +7,7 @@ using Interpolations
 
 export integrate, cumul_integrate
 export Trapezoidal, TrapezoidalEven, TrapezoidalFast, TrapezoidalEvenFast
-export SimpsonEven, SimpsonEvenFast
+export SimpsonEven, SimpsonEvenFast, Simpson, SimpsonFast
 export RombergEven
 export IntegrationMethod
 
@@ -17,7 +17,9 @@ struct Trapezoidal         <: IntegrationMethod end
 struct TrapezoidalEven     <: IntegrationMethod end
 struct TrapezoidalFast     <: IntegrationMethod end
 struct TrapezoidalEvenFast <: IntegrationMethod end
+struct Simpson             <: IntegrationMethod end
 struct SimpsonEven         <: IntegrationMethod end # https://en.wikipedia.org/wiki/Simpson%27s_rule#Alternative_extended_Simpson.27s_rule
+struct SimpsonFast         <: IntegrationMethod end
 struct SimpsonEvenFast     <: IntegrationMethod end
 struct RombergEven{T<:AbstractFloat} <: IntegrationMethod
     acc::T
@@ -105,6 +107,55 @@ function integrate(x::AbstractVector, y::AbstractVector, ::TrapezoidalEvenFast)
         end
         @inbounds return (x[2] - x[1]) * (retval + HALF * (y[1] + y[end]))
     end
+end
+
+"""
+    integrate(x::AbstractVector, y::AbstractVector, ::Simpson)
+
+Use Simpson's rule on an irregularly spaced grid x.
+"""
+function integrate(x::AbstractVector, y::AbstractVector, ::Simpson)
+    length(x) == length(y) || error("x and y vectors must be of the same length!")
+    length(x) ≥ 2 || error("vectors must contain at least 3 elements")
+
+    return integrate(x, y, SimpsonFast())
+end
+
+"""
+    integrate(x::AbstractVector, y::AbstractVector, ::SimpsonFast)
+
+Use Simpson's rule on an irregularly spaced grid x. Unsafe method, no bounds checking.
+"""
+function integrate(x::AbstractVector, y::AbstractVector, ::SimpsonFast)
+    N = length(x)
+    retval = zero(eltype(y))*x[1]
+    yjp2 = y[1]
+    @inbounds @fastmath for i in 0:floor(Int64, (N-1)/2)-1
+        j = 2i+1
+        jp1 = j+1
+        jp2 = jp1+1
+
+        dxj = x[jp1] - x[j]
+        dxjp1 = x[jp2] - x[jp1]
+
+        yj = yjp2
+        yjp1 = y[jp1]
+        yjp2 = y[jp2]
+
+        term1 = (2 - dxjp1/dxj) * yj
+        term2 = (dxjp1 + dxj)^2 / (dxjp1*dxj) * yjp1
+        term3 = (2 - dxj/dxjp1) * yjp2
+        
+        retval += (dxj+dxjp1)*(term1+term2+term3)/6
+    end
+    @inbounds @fastmath if iseven(N)
+        dxNm1 = x[N] - x[N-1]
+        dxNm2 = x[N-1] - x[N-2]
+        retval += (2dxNm1^2+3dxNm1*dxNm2) / (6(dxNm1+dxNm2)) * y[N]
+        retval += (dxNm1^2+3dxNm1*dxNm2) / (6dxNm2) * y[N-1]
+        retval -= (dxNm1^3) / (6dxNm2*(dxNm2+dxNm1)) * y[N-2]
+    end
+    return retval
 end
 
 """
