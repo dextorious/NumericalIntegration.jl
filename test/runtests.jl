@@ -27,9 +27,9 @@ end
 
 @testset "compare with analytic result, uneven grid" begin
     x1 = [-π;  sort(rand(1000)*2π .- π); π] # even number
-    y1 = sin.(x)
+    y1 = sin.(x1)
     x2 = [-π;  sort(rand(1001)*2π .- π); π] # odd number
-    y2 = sin.(x)
+    y2 = sin.(x2)
     for M in [Trapezoidal, TrapezoidalFast, Simpson, SimpsonFast]
         for T in [Float32, Float64, BigFloat]
             for (xs,ys,val,atol) in [
