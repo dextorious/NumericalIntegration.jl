@@ -3,6 +3,8 @@ using Test
 using InteractiveUtils # for subtypes
 using StaticArrays
 using HCubature # for testing n-dimensional integration
+using Random
+Random.seed!(124)
 
 @testset "compare with analytic result" begin
     x = collect(-π : 2*π/2048 : π)
@@ -16,6 +18,22 @@ using HCubature # for testing n-dimensional integration
                                      (p,q,2,1e-4),
                                   ]
                 result = @inferred integrate(T.(xs), T.(ys),M())
+                @test isapprox(result, val, atol=atol)
+                @test typeof(result) == T
+            end
+        end
+    end
+end
+
+@testset "compare with analytic result, uneven grid" begin
+    x = [-π;  sort(rand(2^10+1)*2π .- π); π]
+    y = sin.(x)
+    for M in [Trapezoidal, TrapezoidalFast, Simpson, SimpsonFast]
+        for T in [Float32, Float64, BigFloat]
+            for (xs,ys,val,atol) in [
+                                     (x, y, 0, 1e-4),
+                                  ]
+                result = @inferred integrate(T.(xs), T.(ys), M())
                 @test isapprox(result, val, atol=atol)
                 @test typeof(result) == T
             end
