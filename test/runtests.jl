@@ -26,12 +26,15 @@ Random.seed!(124)
 end
 
 @testset "compare with analytic result, uneven grid" begin
-    x = [-π;  sort(rand(2^10+1)*2π .- π); π]
-    y = sin.(x)
+    x1 = [-π;  sort(rand(1000)*2π .- π); π] # even number
+    y1 = sin.(x)
+    x2 = [-π;  sort(rand(1001)*2π .- π); π] # odd number
+    y2 = sin.(x)
     for M in [Trapezoidal, TrapezoidalFast, Simpson, SimpsonFast]
         for T in [Float32, Float64, BigFloat]
             for (xs,ys,val,atol) in [
-                                     (x, y, 0, 1e-4),
+                                     (x1, y1, 0, 1e-4),
+                                     (x2, y2, 0, 1e-4),
                                   ]
                 result = @inferred integrate(T.(xs), T.(ys), M())
                 @test isapprox(result, val, atol=atol)
