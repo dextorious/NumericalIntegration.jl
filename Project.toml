@@ -1,7 +1,7 @@
 name = "NumericalIntegration"
 uuid = "e7bfaba1-d571-5449-8927-abc22e82249b"
 authors = ["dextorious"]
-version = "0.3.3"
+version = "0.3.4"
 
 [deps]
 Interpolations = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
@@ -9,8 +9,8 @@ LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
 [compat]
-Interpolations = "0.13"
 julia = "0.7, 1"
+Interpolations = "≥ 0.14.3"
 
 [extras]
 HCubature = "19dc6840-f33b-545b-b366-655c7e3ffd49"
