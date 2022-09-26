@@ -207,7 +207,7 @@ function integrate(X::NTuple{N,AbstractVector}, Y::AbstractArray{T,N}, ::Trapezo
     midpnts = map(_midpoints, X)
     Δ(x::AbstractVector) = length(x) > 1 ? diff(x) : 1
     Δxs = map(Δ, X)
-    interp = LinearInterpolation(X,Y)
+    interp = linear_interpolation(X,Y)
     f((Δx,x)) = prod(Δx)*interp(x...)
     return sum(f, zip(product(Δxs...), product(midpnts...)))
 end
@@ -216,7 +216,7 @@ function integrate(X::NTuple{N,AbstractVector}, Y::AbstractArray{T,N}, ::Trapezo
     midpnts = map(_midpoints, X)
     Δ(x::AbstractVector) = length(x) > 1 ? x[2] - x[1] : 1
     Δx = prod(Δ, X)
-    interp = LinearInterpolation(X,Y)
+    interp = linear_interpolation(X,Y)
     f(x) = interp(x...)
     return Δx*sum(f, product(midpnts...))
 end
@@ -225,7 +225,7 @@ function integrate(X::NTuple{N,AbstractRange}, Y::AbstractArray{T,N}, ::Trapezoi
     midpnts = map(_midpoints, X)
     Δ(x::AbstractVector) = length(x) > 1 ? step(x) : 1
     Δx = prod(Δ, X)
-    interp = LinearInterpolation(X,Y)
+    interp = linear_interpolation(X,Y)
     f(x) = interp(x...)
     return Δx*sum(f, product(midpnts...))
 end
